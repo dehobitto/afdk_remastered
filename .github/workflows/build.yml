@@ -41,7 +41,7 @@ jobs:
           $pkg = "AFDK_Remastered_$ver"
           New-Item -ItemType Directory $pkg | Out-Null
           Copy-Item patch/dist/AFDK.exe, patch/dist/_afdk_remastered.dll, patch/dist/_afdk_remastered_mcp.dll, patch/dist/afdk_mcp.py, README.md $pkg
-          Compress-Archive $pkg "$pkg.zip"
+          Compress-Archive "$pkg/*" "$pkg.zip"           # files at the zip root: unpack straight into the AFDK folder
           "PKG=$pkg" >> $env:GITHUB_ENV
           "VER=$ver" >> $env:GITHUB_ENV
 
