@@ -3,7 +3,9 @@
 static int g_cfg_line_width = 2;        /* [View] LineWidth: lines/outlines on the scheme at zoom 10, in pixels */
 static int g_cfg_font_pct = 125;        /* [View] FontScale: interface font size, percent */
 static char g_cfg_font[32] = "Segoe UI";/* [View] Font */
-static char g_cfg_title[256];           /* [View] Title: window title instead of "AFDK 2.0 | DEVELOPED BY FIOT STUDENT" */
+static char g_cfg_title[256];           /* window title instead of "AFDK 2.0 | DEVELOPED BY FIOT STUDENT"; [View] Title
+                                           (not in the default file) overrides the built-in one */
+#define BUILTIN_TITLE "ADFK remastered by dehobitto"
 static int g_cfg_themes = 1;            /* [View] WindowsStyle: modern look of buttons, fields, scroll bars */
 static int g_cfg_hit = 8;               /* [Edit] HitRadius: how close (pixels) a click must be to grab a line */
 static int g_cfg_wire_follow = 0;       /* [Edit] WiresFollow */
@@ -23,8 +25,6 @@ static const char g_cfg_default[] =
     "FontScale=125" NL
     "; шрифт дерева бібліотеки" NL
     "Font=Segoe UI" NL
-    "; назва програми в заголовку вікна, на панелі задач і у вікнах повідомлень; порожньо = як в оригіналі" NL
-    "Title=" NL
     "; 1 = сучасний вигляд кнопок, полів, смуг прокрутки і діалогів (стиль Windows), 0 = як в оригіналі" NL
     "WindowsStyle=1" NL
     NL
@@ -102,6 +102,7 @@ static void cfg_load(void)
     g_cfg_font_pct = cfg_int("View", "FontScale", 125, 50, 300);
     GetPrivateProfileStringA("View", "Font", "Segoe UI", g_cfg_font, sizeof g_cfg_font, g_cfg_path);
     cfg_read_title();
+    if (!g_cfg_title[0]) lstrcpyA(g_cfg_title, BUILTIN_TITLE);
     g_cfg_themes = cfg_int("View", "WindowsStyle", 1, 0, 1);
     g_cfg_hit = cfg_int("Edit", "HitRadius", 8, 2, 30);
     g_cfg_wire_follow = cfg_int("Edit", "WiresFollow", 0, 0, 1);
