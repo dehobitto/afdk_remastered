@@ -1,6 +1,6 @@
 # AFDK Remastered
 
-A patch for AFDK 2.0. Copy `AFDK.exe` and `_afdk_remastered.dll` next to `Lib` and `Projects`. For MCP, also copy `_afdk_remastered_mcp.dll` and `afdk_mcp.py`.
+A patch for AFDK 2.0. Download the zip from [Releases](../../releases/latest) and unpack it next to `Lib` and `Projects` of your AFDK.
 
 ## Features
 

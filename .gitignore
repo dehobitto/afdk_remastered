@@ -3,6 +3,8 @@
 !/.gitignore
 !/README.md
 !/CLAUDE.md
+!/VERSION
+!/.github/
 !/AFDK.exe
 !/_afdk_remastered.dll
 !/_afdk_remastered_mcp.dll

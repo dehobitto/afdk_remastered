@@ -1,0 +1,58 @@
+# Builds the DLLs on every push; a tag vX.Y publishes a release with the ready-to-run zip.
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      LLVM_MINGW: '20261020'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain (llvm-mingw)
+        shell: pwsh
+        run: |
+          $v = $env:LLVM_MINGW
+          curl.exe -fsSL -o llvm.zip "https://github.com/mstorsjo/llvm-mingw/releases/download/$v/llvm-mingw-$v-msvcrt-x86_64.zip"
+          Expand-Archive llvm.zip -DestinationPath C:\tools
+          "AFDK_CLANG=C:\tools\llvm-mingw-$v-msvcrt-x86_64\bin\i686-w64-mingw32-clang.exe" >> $env:GITHUB_ENV
+
+      - name: Build
+        shell: pwsh
+        run: ./patch/build.ps1
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $ver = (Get-Content VERSION -Raw).Trim()
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$ver") {
+            throw "tag $env:GITHUB_REF_NAME does not match VERSION $ver"
+          }
+          $pkg = "AFDK_Remastered_$ver"
+          New-Item -ItemType Directory $pkg | Out-Null
+          Copy-Item patch/dist/AFDK.exe, patch/dist/_afdk_remastered.dll, patch/dist/_afdk_remastered_mcp.dll, patch/dist/afdk_mcp.py, README.md $pkg
+          Compress-Archive $pkg "$pkg.zip"
+          "PKG=$pkg" >> $env:GITHUB_ENV
+          "VER=$ver" >> $env:GITHUB_ENV
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PKG }}
+          path: ${{ env.PKG }}.zip
+
+      - name: Release
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create $env:GITHUB_REF_NAME "$env:PKG.zip" --title "AFDK Remastered $env:VER" --generate-notes

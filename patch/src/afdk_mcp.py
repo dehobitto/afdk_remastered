@@ -18,6 +18,7 @@ PIPE = r"\\.\pipe\afdk_remastered"
 HERE = os.path.dirname(os.path.abspath(__file__))
 EXE = os.path.join(HERE, "AFDK.exe")
 PROTOCOL = "2025-06-18"
+__version__ = "dev"                               # build.ps1 puts the release version here
 
 INSTRUCTIONS = """Controls AFDK Remastered, a logic-circuit editor and simulator (Windows).
 Coordinates are scheme cells (integers), not pixels. Call afdk_state first: it lists elements (with their input and
@@ -259,7 +260,7 @@ def handle(msg):
     if method == "initialize":
         reply(id_, {"protocolVersion": params.get("protocolVersion") or PROTOCOL,
                     "capabilities": {"tools": {"listChanged": False}},
-                    "serverInfo": {"name": "afdk-remastered", "version": "1.0.0"},
+                    "serverInfo": {"name": "afdk-remastered", "version": __version__},
                     "instructions": INSTRUCTIONS})
     elif method == "ping":
         reply(id_, {})
