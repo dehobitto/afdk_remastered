@@ -5,7 +5,7 @@ static int g_cfg_font_pct = 125;        /* [View] FontScale: interface font size
 static char g_cfg_font[32] = "Segoe UI";/* [View] Font */
 static char g_cfg_title[256];           /* window title instead of "AFDK 2.0 | DEVELOPED BY FIOT STUDENT"; [View] Title
                                            (not in the default file) overrides the built-in one */
-#define BUILTIN_TITLE "ADFK remastered by dehobitto"
+#define BUILTIN_TITLE "AFDK remastered by dehobitto"
 static int g_cfg_themes = 1;            /* [View] WindowsStyle: modern look of buttons, fields, scroll bars */
 static int g_cfg_hit = 8;               /* [Edit] HitRadius: how close (pixels) a click must be to grab a line */
 static int g_cfg_wire_follow = 0;       /* [Edit] WiresFollow */
