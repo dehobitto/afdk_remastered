@@ -16,6 +16,7 @@ jobs:
     runs-on: windows-latest
     env:
       LLVM_MINGW: '20261020'
+      VT_API_KEY: ${{ secrets.VIRUSTOTAL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -56,3 +57,33 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create $env:GITHUB_REF_NAME "$env:PKG.zip" --title "AFDK Remastered $env:VER" --generate-notes
+
+      # the published zip and every file in it go to VirusTotal; their report links are added to the release notes
+      # (a manual run of the workflow refreshes them for the release of the current VERSION)
+      - name: VirusTotal
+        if: env.VT_API_KEY != '' && (github.ref_type == 'tag' || github.event_name == 'workflow_dispatch')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "v$env:VER"
+          New-Item -ItemType Directory vt | Out-Null
+          gh release download $tag -p "*.zip" -D vt
+          if ($LASTEXITCODE) { Write-Warning "no release $tag"; exit 0 }
+          $zip = Get-ChildItem vt -Filter *.zip | Select-Object -First 1
+          Expand-Archive $zip.FullName vt/files
+          $files = @($zip) + @(Get-ChildItem vt/files -File | Where-Object Name -ne 'README.md')
+          $links = @()
+          foreach ($f in $files) {
+            $sha = (Get-FileHash $f.FullName -Algorithm SHA256).Hash.ToLower()
+            $code = curl.exe -s -o vt/answer.json -w "%{http_code}" -X POST https://www.virustotal.com/api/v3/files `
+              -H "x-apikey: $env:VT_API_KEY" -F "file=@$($f.FullName)"
+            if ($code -ne '200') { Write-Warning "VirusTotal upload of $($f.Name): HTTP $code $(Get-Content vt/answer.json -Raw)" }
+            $links += "- [$($f.Name)](https://www.virustotal.com/gui/file/$sha)"
+            Start-Sleep -Seconds 16                                   # free API: 4 requests a minute
+          }
+          $body = (gh release view $tag --json body -q .body) -join "`n"
+          $body = ($body -split "`n## VirusTotal")[0].TrimEnd()
+          $body += "`n`n## VirusTotal`n`n" + ($links -join "`n") + "`n"
+          Set-Content vt/notes.md $body -Encoding utf8
+          gh release edit $tag --notes-file vt/notes.md
