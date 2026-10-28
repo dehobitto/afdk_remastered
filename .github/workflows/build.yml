@@ -58,7 +58,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh release create $env:GITHUB_REF_NAME "$env:PKG.zip" --title "AFDK Remastered $env:VER" --generate-notes
 
-      # the published zip and every file in it go to VirusTotal; their report links are added to the release notes
+      # the files in the published zip (not the zip itself, not the README) go to VirusTotal; their report links are
+      # added to the release notes
       # (a manual run of the workflow refreshes them for the release of the current VERSION)
       - name: VirusTotal
         if: env.VT_API_KEY != '' && (github.ref_type == 'tag' || github.event_name == 'workflow_dispatch')
@@ -72,7 +73,7 @@ jobs:
           if ($LASTEXITCODE) { Write-Warning "no release $tag"; exit 0 }
           $zip = Get-ChildItem vt -Filter *.zip | Select-Object -First 1
           Expand-Archive $zip.FullName vt/files
-          $files = @($zip) + @(Get-ChildItem vt/files -File | Where-Object Name -ne 'README.md')
+          $files = @(Get-ChildItem vt/files -File | Where-Object Name -ne 'README.md')
           $links = @()
           foreach ($f in $files) {
             $sha = (Get-FileHash $f.FullName -Algorithm SHA256).Hash.ToLower()
@@ -84,6 +85,8 @@ jobs:
           }
           $body = (gh release view $tag --json body -q .body) -join "`n"
           $body = ($body -split "`n## VirusTotal")[0].TrimEnd()
-          $body += "`n`n## VirusTotal`n`n" + ($links -join "`n") + "`n"
+          $note = "A few heuristic engines may flag the files: AFDK.exe is patched to load the DLL (an added import, " +
+                  "like file infectors do) and the DLL hooks system functions. These are false positives."
+          $body += "`n`n## VirusTotal`n`n$note`n`n" + ($links -join "`n") + "`n"
           Set-Content vt/notes.md $body -Encoding utf8
           gh release edit $tag --notes-file vt/notes.md
