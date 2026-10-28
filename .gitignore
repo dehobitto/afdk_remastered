@@ -1,16 +1,11 @@
-# only the patch and its ready build; the original program files stay out
+# sources and what the build needs; built files and the program's own data stay out
 /*
 !/.gitignore
 !/README.md
 !/CLAUDE.md
 !/VERSION
 !/.github/
-!/AFDK.exe
-!/_afdk_remastered.dll
-!/_afdk_remastered_mcp.dll
-!/afdk_mcp.py
 !/patch/
-/patch/orig/
 /patch/re/
 /patch/dist/
 __pycache__/

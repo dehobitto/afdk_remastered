@@ -17,14 +17,9 @@ if ($LASTEXITCODE) { throw 'compile mcp failed' }
 $py = [IO.File]::ReadAllText((Join-Path $here 'src\afdk_mcp.py')).Replace('__version__ = "dev"', "__version__ = `"$version`"")
 [IO.File]::WriteAllText((Join-Path $dist 'afdk_mcp.py'), $py)
 
-# AFDK.exe: the original with the DLL import added; without the original (it is not in git), the patched one from
-# the repository root is used as it is
-if (Test-Path $orig) {
-    python (Join-Path $here 'inject_import.py') $orig (Join-Path $dist 'AFDK.exe') _afdk_remastered.dll Init
-    if ($LASTEXITCODE) { throw 'inject failed' }
-} else {
-    Copy-Item (Join-Path $root 'AFDK.exe') $dist -Force
-}
+# AFDK.exe: the original with the DLL import added
+python (Join-Path $here 'inject_import.py') $orig (Join-Path $dist 'AFDK.exe') _afdk_remastered.dll Init
+if ($LASTEXITCODE) { throw 'inject failed' }
 foreach ($f in 'Lib', 'Projects', 'AFDK.hlp', 'AFDK.GID') {
     if ((Test-Path (Join-Path $root $f)) -and -not (Test-Path (Join-Path $dist $f))) { Copy-Item (Join-Path $root $f) (Join-Path $dist $f) -Recurse }
 }

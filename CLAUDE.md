@@ -5,11 +5,11 @@ AFDK 2.0 is a Delphi 5 logic-circuit editor with no source. We patch it by injec
 ## Layout
 
 ```
-C:\AFDKdev\                 installed copy the user runs: AFDK.exe, _afdk_remastered.dll, _afdk_remastered.ini, Lib\, Projects\
+C:\AFDKdev\                 installed copy the user runs (exe/DLLs there are build output, not in git): AFDK.exe, _afdk_remastered.dll, _afdk_remastered.ini, Lib\, Projects\
   README.md                 user docs (Ukrainian): features, hotkeys, ini keys
   patch\build.ps1           builds dist\ (DLL + injected exe), copies Lib/Projects into dist on first build
   patch\inject_import.py    adds the DLL import to the original exe
-  patch\orig\AFDK.exe       untouched original (sha256 5ab550ce...) - never modify; not in git (copy it in to build)
+  patch\orig\AFDK.exe       untouched original (sha256 5ab550ce...) - never modify; the build input
   patch\dist\               build output + its own Lib/Projects for testing
   patch\re\all.c            full Ghidra decompile (FUN_xxxxxxxx names = addresses), not in git. grep it instead of re-analysing
   patch\src\                DLL sources, single translation unit:
